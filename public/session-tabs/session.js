@@ -906,6 +906,15 @@ function modeForAbc(mode) {
     .replace(/mixolydian$/i, 'mix');
 }
 
+// Target tempos for in-browser playback at 100% (the preferences pane
+// scales these by tempoPct). Reels and jigs get explicit Q: headers;
+// other tune types fall through to abcjs's built-in default.
+function tempoForType(type) {
+  if (type === 'reel') return 'Q: 1/4=200';
+  if (type === 'jig')  return 'Q: 3/8=130';
+  return null;
+}
+
 function buildAbc(tune, setting) {
   return [
     'X: 1',
@@ -913,9 +922,10 @@ function buildAbc(tune, setting) {
     `R: ${tune.type}`,
     `M: ${tune.meter || '4/4'}`,
     'L: 1/8',
+    tempoForType(tune.type),
     `K: ${modeForAbc(setting.mode || tune.mode)}`,
     setting.abc,
-  ].join('\n');
+  ].filter(Boolean).join('\n');
 }
 
 // Split an ABC body into one string per measure. Naïve barline split —
@@ -947,9 +957,10 @@ function buildSnippetAbc(tune, setting, measures, lo, hi) {
     `R: ${tune.type}`,
     `M: ${tune.meter || '4/4'}`,
     'L: 1/8',
+    tempoForType(tune.type),
     `K: ${modeForAbc(setting.mode || tune.mode)}`,
     slice,
-  ].join('\n');
+  ].filter(Boolean).join('\n');
 }
 
 // --- Settings ------------------------------------------------------------
